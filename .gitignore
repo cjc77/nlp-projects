@@ -1,3 +1,9 @@
 # venv
 myenv/
 .ipynb_checkpoints
+
+
+# Data
+*.json
+*.csv
+*.arrow
