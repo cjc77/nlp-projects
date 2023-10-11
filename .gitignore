@@ -2,8 +2,11 @@
 myenv/
 .ipynb_checkpoints
 
-
 # Data
 *.json
 *.csv
 *.arrow
+
+# Logs
+lightning_logs
+tb_logs
