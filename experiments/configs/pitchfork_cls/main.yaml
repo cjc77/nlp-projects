@@ -1,0 +1,8 @@
+dataset_checkpoint: "mattismegevand/pitchfork"
+dataset_checkpoint_revision: "4d88fdd126d4dc1aa70ac0dbee25fd0020dd9690"
+
+# model_checkpoint: "distilbert-base-cased"
+# model_checkpoint_revision: "0dacbb01d604f8adeeb5b87c9339e485ac40d5c0"
+
+model_checkpoint: "distilbert-base-multilingual-cased"
+model_checkpoint_revision: "9e90d6dd84b6a2e4d65e4d751baed6cd56578fd3"
