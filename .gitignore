@@ -6,9 +6,12 @@ myenv/
 .ipynb_checkpoints
 
 # Data
-*.json
-*.csv
-*.arrow
+# *.json
+# *.csv
+# *.arrow
+# raw/
+data/*
+!data/.gitkeep
 
 # Logs
 lightning_logs/
