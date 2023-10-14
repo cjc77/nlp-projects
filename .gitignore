@@ -6,10 +6,6 @@ myenv/
 .ipynb_checkpoints
 
 # Data
-# *.json
-# *.csv
-# *.arrow
-# raw/
 data/*
 !data/.gitkeep
 
@@ -21,3 +17,10 @@ checkpoints/
 # Saved results
 experiments/results/*
 !experiments/results/.gitkeep
+
+# Custom python packages
+*.egg-info
+
+# Python
+__pycache__/
+*.pyc
