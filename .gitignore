@@ -1,3 +1,6 @@
+# Local files
+.virtual_documents/
+
 # venv
 myenv/
 .ipynb_checkpoints
@@ -8,5 +11,10 @@ myenv/
 *.arrow
 
 # Logs
-lightning_logs
-tb_logs
+lightning_logs/
+tb_logs/
+checkpoints/
+
+# Saved results
+experiments/results/*
+!experiments/results/.gitkeep

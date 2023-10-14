@@ -1,0 +1,6 @@
+dataset_checkpoint: "mattismegevand/pitchfork"
+dataset_checkpoint_revision: "4d88fdd126d4dc1aa70ac0dbee25fd0020dd9690"
+
+pt_model_checkpoint: "sentence-transformers/all-MiniLM-L6-v2"
+pt_model_checkpoint_revision: "7dbbc90392e2f80f3d3c277d6e90027e55de9125"
+dataset_id: "minilm_l6"
