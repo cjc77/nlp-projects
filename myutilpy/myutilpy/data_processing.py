@@ -18,15 +18,12 @@ uml_I = "\u00CF"
 delta = "\u2206"
 delta2 = "\u25B3"
 degree = "\u02DA"
-# ١
 one = "\u0661"
-# ٩
 nine = "\u0669"
-# Å
 AA = "\u0041\u030A"
-# ü
 ue = "\u0075\u0308"
 heart = "\u2661"
+fill_heart = "\u2764"
 
 
 # Define replacement dictionary for blacklists
@@ -48,13 +45,14 @@ blacklist_replace_dict = {
     one: "1",
     nine: "9",
     heart: "heart",
+    fill_heart: "heart",
 }
 
 
 # Blacklisted unicode characters for each model type
 blacklists = {
     "distilbert_base_multi_cased": [curly_lsquote, curly_rsquote, curly_ldquote, curly_rdquote, em_dash, double_plus, ellipsis, en_dash, uml_I, delta, AA, degree, ue],
-    "minilm_l6": [delta2, degree, one, double_plus, one, nine, heart]
+    "minilm_l6": [delta2, degree, one, double_plus, one, nine, heart, fill_heart]
 }
 
 
