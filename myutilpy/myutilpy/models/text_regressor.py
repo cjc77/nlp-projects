@@ -10,7 +10,7 @@ from torch.optim import AdamW
 
 
 class TextRegressor(nn.Module):
-    def __init__(self, embedder: torch.Module, embed_dim: int, pooling_fn: Callable, output_dim: int = 1):
+    def __init__(self, embedder: nn.Module, embed_dim: int, pooling_fn: Callable, output_dim: int = 1):
         """A regression model that predicts real-numbered values given tokenized text passages.
 
         Args:
@@ -177,20 +177,26 @@ class LitTextRegressor(pl.LightningModule):
         optimizer = AdamW(optimizer_grouped_parameters, lr=self.lr)
         return optimizer
         
-    def freeze_pretrained_model(self):
+    def freeze_pretrained_model(self, lr: float = 1e-3):
         """Freeze the weights of the pre-trained model.
 
-        Also, set a higher learning rate for the regression head parameters.
+        Also, set a new learning rate for the regression head parameters.
+
+        Args:
+            lr (float, optional): New learning rate. Defaults to 1e-3.
         """
         for param in self.text_regressor.embedder.parameters():
             param.requires_grad = False
-        self.lr = 1e-3
+        self.lr = lr
 
-    def unfreeze_pretrained_model(self):
+    def unfreeze_pretrained_model(self, lr: float = 1e-5):
         """Un-freeze the weights of the pre-trained model.
 
-        Also, set a lower learning rate for the full set of parameters.
+        Also, set a new learning rate for the full set of parameters.
+
+        Args:
+            lr (float, optional): New learning rate. Defaults to 1e-5.
         """
         for param in self.text_regressor.embedder.parameters():
             param.requires_grad = True
-        self.lr = 1e-5
+        self.lr = lr
