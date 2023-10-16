@@ -56,7 +56,18 @@ blacklists = {
 }
 
 
-def detect_wrong_type(examples: dict, cols: list[str], dtype: Type) -> list[bool]:
+def detect_wrong_type_batched(examples: dict, cols: list[str], dtype: Type) -> list[bool]:
+    """Detects whether rows in a dataset contain entries of a type other than what is expected in a list of columns of interest.
+
+    Args:
+        examples (dict): A chunk of the dataset.
+        cols (list[str]): The columns which should be checked for the condition.
+        dtype (Type): The type that `cols` should contain in all row entries.
+
+    Returns:
+        list[bool]: Boolean list with `False` for rows where at least one column contains an entry
+            that is not of type `dtype`.
+    """
     is_dtype = []
     # All columns should be of the same length
     for i in range(len(examples[cols[0]])):
@@ -66,13 +77,35 @@ def detect_wrong_type(examples: dict, cols: list[str], dtype: Type) -> list[bool
     return is_dtype
 
 
-def get_n_tokens_batched(examples: dict, text_col: list[str], tokenizer: PreTrainedTokenizerBase) -> dict:
+def get_n_tokens_batched(examples: dict, text_col: str, tokenizer: PreTrainedTokenizerBase) -> dict:
+    """Computes the number of tokens that a given column will produce for each row of a dataset chunk.
+
+    Args:
+        examples (dict): A chunk of the dataset.
+        text_col (str): The column that contains the text to be tokenized.
+        tokenizer (PreTrainedTokenizerBase): The tokenizer that will be used for tokenization.
+
+    Returns:
+        dict: A column containing the number of tokens that `text_col` will produce within
+            each row of `examples`.
+    """
     inputs = tokenizer(examples[text_col], truncation=False)
     n_tokens = [len(inp_ids) for inp_ids in inputs["input_ids"]]
     return {f"{text_col}_n_tokens": n_tokens}
 
 
 def detect_unk_batched(examples: dict, cols: list[str], tokenizer: PreTrainedTokenizerBase) -> list[bool]:
+    """Detects whether rows in a dataset contain text that will be mapped to an "unknown" token in a list of columns of interest.
+
+    Args:
+        examples (dict): A chunk of the dataset.
+        cols (list[str]): The columns which should be checked for the condition.
+        tokenizer (PreTrainedTokenizerBase): The tokenizer that will be used for tokenization.
+
+    Returns:
+        list[bool]: Boolean list with `False` for rows where unknown tokens are contained in at
+            least one of the columns of interest after tokenization.
+    """
     batch_ids_dict = {col: tokenizer(examples[col]).input_ids for col in cols}
     unk_markers = []
     # All columns should be of the same length
@@ -84,6 +117,17 @@ def detect_unk_batched(examples: dict, cols: list[str], tokenizer: PreTrainedTok
 
 
 def detect_only_unk_batched(examples: dict, cols: list[str], tokenizer: PreTrainedTokenizerBase) -> list[bool]:
+    """Detects whether rows in a dataset contain *only* text that will be mapped to an "unknown" token in a list of columns of interest.
+
+    Args:
+        examples (dict): A chunk of the dataset.
+        cols (list[str]): The columns which should be checked for the condition.
+        tokenizer (PreTrainedTokenizerBase): The tokenizer that will be used for tokenization.
+
+    Returns:
+        list[bool]: Boolean list with `False` for rows where at least one of the columns
+            of interest contains *only* unknown tokens after tokenization.
+    """
     batch_ids_dict = {col: tokenizer(examples[col]).input_ids for col in cols}
     only_unk_markers = []
     
@@ -97,15 +141,42 @@ def detect_only_unk_batched(examples: dict, cols: list[str], tokenizer: PreTrain
 
 
 def get_blacklist_pattern(blacklist_key: str) -> re.Pattern:
+    """Retrieves the appropriate blacklist pattern for the given key.
+
+    Args:
+        blacklist_key (str): The key for the desired blacklist pattern.
+
+    Returns:
+        re.Pattern: The pattern that will be used to identify text that will be replaced.
+    """
     blacklist_pattern = re.compile("|".join(blacklists[blacklist_key]))
     return blacklist_pattern
 
 
-def token_replacer(match):
+def token_replacer(match: re.Match) -> str:
+    """Replaces tokens in the `match` using the `blacklist_replace_dict`.
+
+    Args:
+        match (re.Match): The matched instances given the blacklist pattern.
+
+    Returns:
+        str: A string with the matched blacklist items replaced.
+    """
     return blacklist_replace_dict[match.group(0)]
 
 
-def replace_known_unk_tokens_batched(examples, cols, blacklist_pattern: re.Pattern) -> dict:
+def replace_known_unk_tokens_batched(examples: dict, cols: list[str], blacklist_pattern: re.Pattern) -> dict:
+    """Replaces text that will map to the "unknown" token when tokenized, so long as it is specified in the `blacklist_pattern`.
+
+    Args:
+        examples (dict): A chunk of the dataset.
+        cols (list[str]): The columns which should be checked for the condition.
+        blacklist_pattern (re.Pattern): A pattern that will be checked against to identify
+            text that will be tokenized as "unknown".
+
+    Returns:
+        dict: A chunkn of the dataset with the blacklisted text replaced.
+    """
     replaced_batch = {col: [] for col in cols}
 
     # All columns should be of the same length
@@ -116,10 +187,3 @@ def replace_known_unk_tokens_batched(examples, cols, blacklist_pattern: re.Patte
             replaced_batch[col].append(replaced_text)
             
     return replaced_batch
-
-
-def replace_known_unk_tokens(examples, cols, blacklist_pattern: re.Pattern) -> dict:
-    replaced = {}
-    for col in cols:
-        replaced[col] = blacklist_pattern.sub(token_replacer, html.unescape(examples[col]))
-    return replaced
