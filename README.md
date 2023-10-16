@@ -13,7 +13,7 @@ Personal projects using NLP techniques.
 
 The following project requires `python` 3.10 and `R` 4.3 to be installed.
 
-### Dependencies
+### Dependencies (`python`)
 To run the `python` code in this project, you will first need to install the relevant dependencies. This can be done by executing the following command from the project root:
 
 ```
@@ -25,6 +25,9 @@ Also, since this project contains a custom utilities library `myutilpy`, this mu
 ```
 pip install -e myutilpy
 ```
+
+### Dependencies (`R`)
+This project contains a few `R` language `jupyter` notebooks. To execute these, your `R` environment must have the dependencies specified in `requirements_R.txt` installed. This can be done manually for each listed dependency.
 
 ## Pitchfork Rating Prediction
 
