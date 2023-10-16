@@ -1,4 +1,5 @@
 import numpy as np
+from typing import Callable
 
 import torch
 import torch.nn as nn
@@ -9,7 +10,18 @@ from torch.optim import AdamW
 
 
 class TextRegressor(nn.Module):
-    def __init__(self, embedder, embed_dim, pooling_fn, output_dim=1):
+    def __init__(self, embedder: torch.Module, embed_dim: int, pooling_fn: Callable, output_dim: int = 1):
+        """A regression model that predicts real-numbered values given tokenized text passages.
+
+        Args:
+            embedder (torch.Module): The embedding model that will be used to convert tokens into 
+                embeddings.
+            embed_dim (int): The dimensionality of the embeddings.
+            pooling_fn (Callable): The pooling function that will be used to convert the token 
+                embeddings into full sequence embeddings.
+            output_dim (int, optional): The output dimension for the regression task.
+                Defaults to 1.
+        """
         super().__init__()
         
         # Initialize the encoder
@@ -21,7 +33,16 @@ class TextRegressor(nn.Module):
         # Pooling strategy
         self.pooling_fn = pooling_fn
         
-    def forward(self, input_ids, attention_mask):
+    def forward(self, input_ids: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
+        """Predicts the regression target(s) using input token IDs and their corresponding attention masks.
+
+        Args:
+            input_ids (torch.Tensor): Input token IDs
+            attention_mask (torch.Tensor): Corresponding attention masks for the input token IDs.
+
+        Returns:
+            torch.Tensor: Predictions for the regression target(s).
+        """
         # Forward pass through encoder
         embedding = self.embedder(input_ids=input_ids, attention_mask=attention_mask).last_hidden_state
         
@@ -34,7 +55,7 @@ class TextRegressor(nn.Module):
 
 
 class LitTextRegressor(pl.LightningModule):
-    def __init__(self, text_regressor):
+    def __init__(self, text_regressor: TextRegressor):
         super().__init__()
         self.text_regressor = text_regressor
         # Loss
@@ -62,11 +83,11 @@ class LitTextRegressor(pl.LightningModule):
             "rmse": None
         }
 
-    def forward(self, input_ids, attention_mask):
+    def forward(self, input_ids: torch.Tensor, attention_mask: torch.Tensor):
         yhat = self.text_regressor(input_ids=input_ids, attention_mask=attention_mask)
         return yhat
 
-    def training_step(self, batch, batch_idx):
+    def training_step(self, batch, batch_idx: int):
         input_ids, attention_mask, ratings = batch
         yhat = self.text_regressor(input_ids=input_ids, attention_mask=attention_mask).view(-1)
 
@@ -75,7 +96,7 @@ class LitTextRegressor(pl.LightningModule):
         self.log("avg_train_loss", loss.item(), on_epoch=True, on_step=False, prog_bar=True)
         return loss
 
-    def validation_step(self, batch, batch_idx):
+    def validation_step(self, batch, batch_idx: int):
         input_ids, attention_mask, ratings = batch
         yhat = self.text_regressor(input_ids=input_ids, attention_mask=attention_mask).view(-1)
 
@@ -108,7 +129,7 @@ class LitTextRegressor(pl.LightningModule):
                 else:
                     logger.experiment.log_metrics({f"val_{k}": v}, self.current_epoch)
 
-    def test_step(self, batch, batch_idx):
+    def test_step(self, batch, batch_idx: int):
         input_ids, attention_mask, ratings = batch
         yhat = self.text_regressor(input_ids=input_ids, attention_mask=attention_mask)
         
@@ -142,6 +163,7 @@ class LitTextRegressor(pl.LightningModule):
 
     def configure_optimizers(self):
         no_wd_parameters = ["word_embeddings", "position_embeddings"]
+        # Don't use weight decay on the embedding parameters.
         optimizer_grouped_parameters = [
             {
                 "params": [p for n, p in self.text_regressor.named_parameters() if any(excl in n for excl in no_wd_parameters)],
@@ -156,11 +178,19 @@ class LitTextRegressor(pl.LightningModule):
         return optimizer
         
     def freeze_pretrained_model(self):
+        """Freeze the weights of the pre-trained model.
+
+        Also, set a higher learning rate for the regression head parameters.
+        """
         for param in self.text_regressor.embedder.parameters():
             param.requires_grad = False
         self.lr = 1e-3
 
     def unfreeze_pretrained_model(self):
+        """Un-freeze the weights of the pre-trained model.
+
+        Also, set a lower learning rate for the full set of parameters.
+        """
         for param in self.text_regressor.embedder.parameters():
             param.requires_grad = True
         self.lr = 1e-5
