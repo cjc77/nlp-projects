@@ -37,5 +37,5 @@ This sequence of notebooks utilizes a [Pitchfork](https://pitchfork.com/) review
 
 1. Data preprocessing ([`01_initial_data_prep`](./notebooks_pitchfork_ratings/01_initial_data_prep.ipynb)). Loading, cleaning, and preprocessing of data.
 2. Exploratory data analysis ([`02_data_explore`](./notebooks_pitchfork_ratings/02_data_explore.ipynb)). Visualization and summary statistics of processed dataset.
-3. Model fitting ([`03_rating_pred`](./notebooks_pitchfork_ratings/03_rating_pred.ipynb)). Model fitting and saving of model parameters, along with performance metrics collection.
+3. Model fitting and prediction ([`03_rating_pred`](./notebooks_pitchfork_ratings/03_rating_pred.ipynb)). Model fitting and saving of model parameters. Also, collection and save-out of performance metrics and test set predictions.
 4. Results analysis ([`04_fit_analysis`](./notebooks_pitchfork_ratings/04_fit_analysis.ipynb)). Post-fit investigation of model performance on test data.
