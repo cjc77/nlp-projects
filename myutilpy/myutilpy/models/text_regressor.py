@@ -133,7 +133,7 @@ class LitTextRegressor(pl.LightningModule):
         input_ids, attention_mask, ratings = batch
         yhat = self.text_regressor(input_ids=input_ids, attention_mask=attention_mask).view(-1)
         
-        loss = self.criterion(yhat, ratings.unsqueeze(1))
+        loss = self.criterion(yhat, ratings)
         self.log("avg_test_loss", loss, on_epoch=True, on_step=False, prog_bar=True)
 
         self.test_epoch_out["yhat"].append(yhat)

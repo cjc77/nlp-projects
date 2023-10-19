@@ -1,5 +1,6 @@
 pooling: "cls"
 model_seed: 42
+
 # Set these to null if want to train from scratch
 frozen_model_checkpoint_path: null
 finetune_model_checkpoint_path: null
