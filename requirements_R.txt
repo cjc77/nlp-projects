@@ -2,3 +2,4 @@ tidyverse
 yaml
 languageserver
 IRkernel
+coda
